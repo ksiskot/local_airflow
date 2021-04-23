@@ -9,19 +9,28 @@ from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
 import pandas as pd
 from os import path
-
-from trade_airflow.utils.database_to_csv_operator import DatabaseToCSVOperator
-from trade_airflow.utils import emailAlerts
-from trade_airflow.utils import dag_utilsy
-from trade_airflow.utils.constants import EnvVar
-
+from airflow.utils import dates
+"""
+from utils.database_to_csv_operator import DatabaseToCSVOperator
+from utils import emailAlerts
+from utils import dag_utilsy
+from utils.constants import EnvVar
+"""
 postgres_conn_id = 'ods'
+
+args = {
+    'owner': 'airflow',
+    'start_date': dates.days_ago(1),
+    'email_on_failure': True,
+    'email_on_success': True,
+    #'schedule_interval': '0 1 * * *',
+}
 
 dag = DAG(
     dag_id='ODS_STALKER',
-    default_args=dag_utils.default_args,
+    default_args=args,
     description='DAG to monitor ods process id and send an e-mail with the results',
-    schedule_interval=EnvVar.ods_process_id_report_schedule,
+    schedule_interval=None,
     catchup=False,
     concurrency=1,
     max_active_runs=1
@@ -29,8 +38,8 @@ dag = DAG(
 
 def run_monitor_query(**kwargs):
     query = kwargs['sqlQuery']
-    environment = Variable.get(constants.variable_environment)
-    to_email = EnvVar.ods_process_id_report_email
+    environment = "Dev"
+    to_email = "email"
     pg_hook = PostgresHook(postgres_conn_id=postgres_conn_id, schema=None)
 
 
@@ -57,6 +66,6 @@ postgresql = PythonOperator(
         task_id='run_monitor_query',
         provide_context=True,
         python_callable=run_monitor_query,
-        op_kwargs={'sqlQuery': EnvVar.ods_process_id_report_sql},
+        op_kwargs={'sqlQuery': "select current_time"},
         dag=dag
     )
