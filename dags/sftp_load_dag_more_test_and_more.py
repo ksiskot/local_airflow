@@ -94,7 +94,7 @@ def load_files(**context):
         my_bucket.download_file(obj.key, filename)
     """
     s3_conn = boto3.client('s3',aws_access_key_id=cred_dict['aws_access_key_id'], aws_secret_access_key=cred_dict['aws_secret_access_key'])
-    #s3_conn = boto3.client('s3',aws_access_key_id='AKIA5NVJSFF2FCX6UHGS', aws_secret_access_key='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')
+
     
 
     
